@@ -11,8 +11,8 @@
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "8.0.13",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "8.0.13",
           "Microsoft.AspNetCore.Identity.UI": "8.0.13",
-          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.13",
-          "Microsoft.EntityFrameworkCore.Tools": "8.0.13"
+          "Microsoft.EntityFrameworkCore.Design": "8.0.13",
+          "Microsoft.EntityFrameworkCore.SqlServer": "8.0.13"
         },
         "runtime": {
           "StudyBuddy.Web.dll": {}
@@ -467,11 +467,6 @@
             "assemblyVersion": "8.0.13.0",
             "fileVersion": "8.0.1325.6604"
           }
-        }
-      },
-      "Microsoft.EntityFrameworkCore.Tools/8.0.13": {
-        "dependencies": {
-          "Microsoft.EntityFrameworkCore.Design": "8.0.13"
         }
       },
       "Microsoft.Extensions.Caching.Abstractions/8.0.0": {
@@ -1164,13 +1159,6 @@
       "sha512": "sha512-u63lys+66IdCJKMg0eUe/SQkmbyiFXEDS81Xgw+19RiUGpzsfB3PpkCBggmYWBbC5YDnKtgthpr8R7Nljv/QXA==",
       "path": "microsoft.entityframeworkcore.sqlserver/8.0.13",
       "hashPath": "microsoft.entityframeworkcore.sqlserver.8.0.13.nupkg.sha512"
-    },
-    "Microsoft.EntityFrameworkCore.Tools/8.0.13": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-mbCcyX6ImsCcK2OU2qEQKLWaHn91Z7P/KlQSKCZt+rxRMM+d94jV3SR3KKSchA4TzAehZaDKeQlLxuToEX15gQ==",
-      "path": "microsoft.entityframeworkcore.tools/8.0.13",
-      "hashPath": "microsoft.entityframeworkcore.tools.8.0.13.nupkg.sha512"
     },
     "Microsoft.Extensions.Caching.Abstractions/8.0.0": {
       "type": "package",
