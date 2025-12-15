@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using StudyBuddy.Web.Models;
 
@@ -13,9 +14,10 @@ public class HomeController : Controller
         _logger = logger;
     }
 
+    [Authorize]
     public IActionResult Index()
     {
-        return View();
+        return RedirectToAction("Index", "StudyTasks");
     }
 
     public IActionResult Privacy()

@@ -1,0 +1,55 @@
+﻿@model StudyBuddy.Web.Models.StudyTasks
+@using StudyBuddy.Web.Models
+
+
+@{
+    ViewData["Title"] = "Add Study Task";
+}
+
+<h2 class="mb-4">Add Study Task</h2>
+
+<form asp-action="Create" method="post">
+
+    <div class="mb-3">
+        <label asp-for="Title" class="form-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="Description" class="form-label"></label>
+        <textarea asp-for="Description"
+                  class="form-control"
+                  rows="3"
+                  placeholder="Optional notes, topics, reminders...">
+        </textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TaskType" class="form-label"></label>
+        <select asp-for="TaskType"
+                asp-items="Html.GetEnumSelectList<StudyTaskType>()"
+                class="form-select">
+        </select>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="DueDate" class="form-label"></label>
+        <input asp-for="DueDate" type="date" class="form-control" />
+        <span asp-validation-for="DueDate" class="text-danger"></span>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="EstimatedMinutes" class="form-label"></label>
+        <input asp-for="EstimatedMinutes" type="number" min="1" class="form-control" />
+        <span asp-validation-for="EstimatedMinutes" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-success">Save</button>
+    <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

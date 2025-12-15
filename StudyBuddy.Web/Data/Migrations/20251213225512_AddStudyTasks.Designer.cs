@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using StudyBuddy.Web.Data;
 
@@ -11,9 +12,11 @@ using StudyBuddy.Web.Data;
 namespace StudyBuddy.Web.Data.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251213225512_AddStudyTasks")]
+    partial class AddStudyTasks
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -233,7 +236,7 @@ namespace StudyBuddy.Web.Data.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
-            modelBuilder.Entity("StudyBuddy.Web.Models.StudyTasks", b =>
+            modelBuilder.Entity("StudyBuddy.Web.Models.StudyTask", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -241,16 +244,10 @@ namespace StudyBuddy.Web.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<DateTime>("DueDate")
                         .HasColumnType("datetime2");
 
                     b.Property<int>("EstimatedMinutes")
-                        .HasColumnType("int");
-
-                    b.Property<int>("TaskType")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
@@ -326,7 +323,7 @@ namespace StudyBuddy.Web.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("StudyBuddy.Web.Models.StudyTasks", b =>
+            modelBuilder.Entity("StudyBuddy.Web.Models.StudyTask", b =>
                 {
                     b.HasOne("StudyBuddy.Web.Models.ApplicationUser", "User")
                         .WithMany()
