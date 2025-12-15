@@ -1,7 +1,6 @@
 ﻿@model StudyBuddy.Web.Models.StudyTasks
 @using StudyBuddy.Web.Models
 
-
 @{
     ViewData["Title"] = "Add Study Task";
 }
@@ -36,20 +35,41 @@
 
     <div class="mb-3">
         <label asp-for="DueDate" class="form-label"></label>
-        <input asp-for="DueDate" type="date" class="form-control" />
+        <input asp-for="DueDate"
+               type="text"
+               id="dueDatePicker"
+               class="form-control"
+               placeholder="dd/MM/yyyy" />
         <span asp-validation-for="DueDate" class="text-danger"></span>
     </div>
 
     <div class="mb-3">
         <label asp-for="EstimatedMinutes" class="form-label"></label>
-        <input asp-for="EstimatedMinutes" type="number" min="1" class="form-control" />
+        <input asp-for="EstimatedMinutes"
+               type="number"
+               min="1"
+               class="form-control" />
         <span asp-validation-for="EstimatedMinutes" class="text-danger"></span>
     </div>
 
     <button type="submit" class="btn btn-success">Save</button>
     <a asp-action="Index" class="btn btn-secondary ms-2">Cancel</a>
+
 </form>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
+
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+    <script>
+        flatpickr("#dueDatePicker", {
+            dateFormat: "d/m/Y",
+            defaultDate: "today",
+            allowInput: false
+        });
+    </script>
 }
