@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using StudyBuddy.Web.Data;
 using StudyBuddy.Web.Models;
 using StudyBuddy.Web.Models.ViewModels;
+using System.Globalization;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace StudyBuddy.Web.Controllers
@@ -22,13 +23,15 @@ namespace StudyBuddy.Web.Controllers
             _userManager = userManager;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(int weekOffset = 0)
         {
             var userId = _userManager.GetUserId(User);
 
             var today = DateTime.Today;
             int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
-            var weekStart = today.AddDays(-diff).Date;
+            var baseWeekStart = today.AddDays(-diff).Date;
+
+            var weekStart = baseWeekStart.AddDays(weekOffset * 7);
 
             var tasks = await _context.StudyTasks
                 .Where(t =>
@@ -46,6 +49,8 @@ namespace StudyBuddy.Web.Controllers
                     .ToDictionary(g => g.Key, g => g.ToList())
             };
 
+            ViewBag.WeekOffset = weekOffset;
+
             return View(model);
         }
 
@@ -58,6 +63,10 @@ namespace StudyBuddy.Web.Controllers
                 DateTime.TryParse(date, out var parsedDate))
             {
                 model.DueDate = parsedDate;
+            }
+            else
+            {
+                model.DueDate = DateTime.Today;
             }
 
             return View(model);
@@ -79,10 +88,7 @@ namespace StudyBuddy.Web.Controllers
             _context.StudyTasks.Add(studyTask);
             await _context.SaveChangesAsync();
 
-            Console.WriteLine($"Saved task for user {studyTask.UserId}, date {studyTask.DueDate}");
             return RedirectToAction(nameof(Index));
-
-
         }
 
         [HttpPost]
@@ -104,9 +110,6 @@ namespace StudyBuddy.Web.Controllers
 
             return RedirectToAction(nameof(Index));
         }
-
-
-
 
     }
 }

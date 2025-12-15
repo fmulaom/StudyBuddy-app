@@ -8,13 +8,13 @@ public enum StudyTaskType
     [Display(Name = "Lecture")]
     Lecture,
 
-    [Display(Name = "Seminar / Exercises")]
+    [Display(Name = "Seminar")]
     Seminar,
 
     [Display(Name = "Exam")]
     Exam,
 
-    [Display(Name = "Assignment / Project")]
+    [Display(Name = "Assignment/Project")]
     Assignment,
 
     [Display(Name = "Reading")]
