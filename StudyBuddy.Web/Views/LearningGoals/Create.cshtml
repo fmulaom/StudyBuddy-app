@@ -1,0 +1,42 @@
+﻿@model StudyBuddy.Web.Models.LearningGoal
+
+@{
+    ViewData["Title"] = "Add Learning Goal";
+}
+
+<h2>Add Learning Goal</h2>
+
+<form asp-action="Create" method="post">
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="form-group">
+        <label asp-for="Title" class="control-label"></label>
+        <input asp-for="Title" class="form-control" />
+        <span asp-validation-for="Title" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Description" class="control-label"></label>
+        <textarea asp-for="Description" class="form-control"></textarea>
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="TargetDate" class="control-label"></label>
+        <input asp-for="TargetDate" class="form-control" type="date" />
+        <span asp-validation-for="TargetDate" class="text-danger"></span>
+    </div>
+
+    <div class="form-group">
+        <label asp-for="Progress" class="control-label"></label>
+        <input asp-for="Progress" class="form-control" type="number" min="0" max="100" />
+        <span asp-validation-for="Progress" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a asp-action="Index" class="btn btn-secondary">Back to list</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

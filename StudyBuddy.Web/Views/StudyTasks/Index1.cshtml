@@ -1,0 +1,139 @@
+﻿@model StudyBuddy.Web.Models.ViewModels.WeeklyCalendarViewModel
+@using StudyBuddy.Web.Models
+
+@functions {
+    string TaskCssClass(StudyTaskType type) => type switch
+    {
+        StudyTaskType.StudySession => "task-study",
+        StudyTaskType.Exam => "task-exam",
+        StudyTaskType.Lecture => "task-lecture",
+        StudyTaskType.Assignment => "task-assignment",
+        StudyTaskType.Reading => "task-reading",
+        _ => "task-other"
+    };
+}
+
+@{
+    ViewData["Title"] = "Weekly Study Planner";
+
+    var days = new[]
+    {
+        DayOfWeek.Monday,
+        DayOfWeek.Tuesday,
+        DayOfWeek.Wednesday,
+        DayOfWeek.Thursday,
+        DayOfWeek.Friday,
+        DayOfWeek.Saturday,
+        DayOfWeek.Sunday
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="mb-0">Weekly Study Planner</h2>
+        <small class="text-muted">
+            Week:
+            <strong>
+                @Model.WeekStart.ToString("dd.MM.yyyy")
+                –
+                @Model.WeekStart.AddDays(6).ToString("dd.MM.yyyy")
+            </strong>
+        </small>
+    </div>
+
+    <a asp-action="Create" class="btn btn-primary justify-content-end">
+        + Add task
+    </a>
+
+
+</div>
+
+<div class="weekly-grid">
+    <div class="d-flex gap-3 weekly-grid-inner">
+
+        @foreach (var day in days)
+        {
+            var dayDate = Model.WeekStart.AddDays(((int)day - 1 + 7) % 7);
+
+            <div class="weekly-day">
+
+                <div class="card h-100">
+                    <div class="card-header text-center">
+                        <div class="fw-bold">@day</div>
+                        <div class="small text-muted">
+                            @dayDate.ToString("dd.MM.yyyy")
+                        </div>
+                    </div>
+
+                    <div class="card-body p-2">
+
+                        @if (Model.TasksByDay.ContainsKey(day))
+                        {
+                            foreach (var task in Model.TasksByDay[day])
+                            {
+                                <div class="task @TaskCssClass(task.TaskType) rounded p-2 mb-2">
+
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong>@task.Title</strong>
+                                            <span class="badge bg-light text-dark border ms-2">
+                                                @task.TaskType
+                                            </span>
+                                        </div>
+
+                                        <form asp-action="Delete"
+                                              method="post"
+                                              onsubmit="return confirm('Delete this task?');">
+                                            @Html.AntiForgeryToken()
+                                            <input type="hidden" name="id" value="@task.Id" />
+                                            <button type="submit"
+                                                    class="btn btn-sm btn-outline-danger">
+                                                ✕
+                                            </button>
+                                        </form>
+                                    </div>
+
+                                    <div class="small text-muted mt-1">
+                                        @task.EstimatedMinutes min
+                                    </div>
+
+                                    @if (!string.IsNullOrWhiteSpace(task.Description))
+                                    {
+                                        <div class="small mt-1">
+                                            @task.Description
+                                        </div>
+                                    }
+
+                                </div>
+                            }
+                        }
+                        else
+                        {
+                            <small class="text-muted d-block text-center mt-2">
+                                No tasks
+                            </small>
+                        }
+
+                    </div>
+                </div>
+
+            </div>
+        }
+
+    </div>
+</div>
+<div class="planner-controls">
+    <div class="btn-group">
+        <a asp-action="Index"
+           asp-route-weekOffset="@(ViewBag.WeekOffset - 1)"
+           class="btn btn-outline-secondary">
+            ←
+        </a>
+
+        <a asp-action="Index"
+           asp-route-weekOffset="@(ViewBag.WeekOffset + 1)"
+           class="btn btn-outline-secondary">
+            →
+        </a>
+    </div>
+</div>

@@ -6,7 +6,7 @@ namespace StudyBuddy.Web.Models
     public class StudyTasks
     {
         public int Id { get; set; }
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         [Display(Name = "Date")]
         [DataType(DataType.Date)]

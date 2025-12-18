@@ -12,4 +12,6 @@ public class ApplicationDbContext : IdentityDbContext
         : base(options)
     {
     }
+    public DbSet<LearningGoal> LearningGoals { get; set; }
+
 }
