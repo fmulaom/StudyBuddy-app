@@ -1,0 +1,53 @@
+﻿@using StudyBuddy.Web.Models.ViewModels
+@model EditStudyProfileViewModel
+
+@{
+    ViewData["Title"] = "Moj profil za učenje";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <h2>🎯 Moj profil za učenje</h2>
+            <p class="text-muted">Postavi predmet, fakultet i razinu znanja da bi podudaranje radilo bolje.</p>
+
+            <form asp-action="EditProfile" asp-controller="PartnerMatching" method="post" class="mt-4">
+                @Html.AntiForgeryToken()
+
+                <div class="mb-3">
+                    <label asp-for="Subject" class="form-label">Predmet *</label>
+                    <input asp-for="Subject" class="form-control" placeholder="npr. Matematika 1" />
+                    <span asp-validation-for="Subject" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Faculty" class="form-label">Fakultet *</label>
+                    <input asp-for="Faculty" class="form-control" placeholder="npr. FER" />
+                    <span asp-validation-for="Faculty" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Level" class="form-label">Razina znanja *</label>
+                    <select asp-for="Level" class="form-select">
+                        <option value="">-- Odaberi --</option>
+                        <option value="Beginner">Početnik</option>
+                        <option value="Intermediate">Srednja razina</option>
+                        <option value="Advanced">Napredna razina</option>
+                    </select>
+                    <span asp-validation-for="Level" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid gap-2">
+                    <button type="submit" class="btn btn-success btn-lg">Spremi profil</button>
+                    <a asp-action="Index" asp-controller="PartnerMatching" class="btn btn-secondary">Nazad</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

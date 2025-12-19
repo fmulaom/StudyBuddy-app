@@ -1,0 +1,57 @@
+﻿@using StudyBuddy.Web.Models.ViewModels
+@model GroupDetailsViewModel
+
+@{
+    ViewData["Title"] = "Raspored sesija";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📅 Raspored sesija: @Model.Group.Name</h2>
+        <a asp-action="Create" asp-route-groupId="@Model.Group.Id" class="btn btn-success">+ Nova sesija</a>
+    </div>
+
+    @if (Model.Sessions?.Count > 0)
+    {
+        <div class="row">
+            @foreach (var session in Model.Sessions)
+            {
+                <div class="col-md-6 mb-3">
+                    <div class="card @(session.Status == "Scheduled" ? "" : "bg-light")">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                @session.StartTime.ToString("dd.MM.yyyy HH:mm") - @session.EndTime.ToString("HH:mm")
+                            </h5>
+                            <p class="card-text">
+                                <strong>Lokacija:</strong> @session.Location<br>
+                                <strong>Status:</strong> <span class="badge bg-info">@session.Status</span>
+                            </p>
+
+                            @if (session.Status == "Scheduled")
+                            {
+                                <form asp-action="Cancel" asp-route-sessionId="@session.Id" method="post" style="display:inline;">
+                                    <button type="submit" class="btn btn-sm btn-danger"
+                                            onclick="return confirm('Otkaži sesiju?')">
+                                        Otkaži
+                                    </button>
+                                </form>
+                            }
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            Nema zakazanih sesija. <a asp-action="Create" asp-route-groupId="@Model.Group.Id">Zakaži prvu sesiju</a>!
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-controller="StudyGroups" asp-action="Details" asp-route-id="@Model.Group.Id" class="btn btn-secondary">
+            Nazad na grupu
+        </a>
+    </div>
+</div>

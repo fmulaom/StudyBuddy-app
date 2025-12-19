@@ -1,0 +1,78 @@
+﻿@using StudyBuddy.Web.Models.ViewModels
+@model PartnerSearchViewModel
+
+@{
+    ViewData["Title"] = "Pronađi partnera za učenje";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2>🎓 Automatsko podudaranje partnera</h2>
+            <p class="text-muted mb-0">
+                Evo preporučenih partnera za učenje na osnovu tvojih interesa.
+            </p>
+        </div>
+        <a asp-action="EditProfile"
+           asp-controller="PartnerMatching"
+           class="btn btn-outline-primary">
+            ✏️ Uredi moj profil
+        </a>
+    </div>
+
+    @if (Model?.Results != null && Model.Results.Count > 0)
+    {
+        <div class="row mt-4">
+            @foreach (var partner in Model.Results)
+            {
+                <div class="col-md-6 col-lg-4 mb-3">
+                    <div class="card shadow-sm h-100">
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title">@partner.Subject</h5>
+                            <p class="card-text mb-2">
+                                <strong>Fakultet:</strong> @partner.Faculty<br />
+                                <strong>Razina:</strong> <span class="badge bg-info">@partner.Level</span>
+                            </p>
+
+                            <div class="mt-auto">
+                                <form asp-action="MarkFavorite"
+                                      asp-controller="PartnerMatching"
+                                      asp-route-partnerId="@partner.Id"
+                                      method="post"
+                                      class="d-inline">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit"
+                                            class="btn btn-sm @(partner.IsFavorite ? "btn-warning" : "btn-outline-warning")">
+                                        @(partner.IsFavorite ? "★ Omiljeni" : "☆ Označi kao omiljeni")
+                                    </button>
+                                </form>
+
+                                <a href="#"
+                                   class="btn btn-sm btn-primary ms-1">
+                                    Pošalji zahtjev
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info mt-4">
+            Nema pronađenih podudaranja za tvoj trenutni profil.
+            <a asp-action="EditProfile" asp-controller="PartnerMatching">Uredi profil</a>
+            ili
+            <a asp-action="Search" asp-controller="PartnerMatching">pokušaj ručnu pretragu</a>.
+        </div>
+    }
+
+    <div class="mt-4">
+        <a asp-action="Search"
+           asp-controller="PartnerMatching"
+           class="btn btn-secondary">
+            🔍 Ručna pretraga partnera
+        </a>
+    </div>
+</div>

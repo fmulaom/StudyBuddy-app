@@ -1,0 +1,48 @@
+﻿@model IEnumerable<StudyGroup>
+
+@{
+    ViewData["Title"] = "Moje grupe";
+}
+
+<div class="container mt-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>📚 Moje studijske grupe</h2>
+        <a asp-action="Create" class="btn btn-success">+ Nova grupa</a>
+    </div>
+
+    @if (Model?.Any() == true)
+    {
+        <div class="row">
+            @foreach (var group in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card shadow">
+                        <div class="card-body">
+                            <h5 class="card-title">@group.Name</h5>
+                            <p class="card-text text-muted">
+                                <small>Kreirano: @group.CreatedAt.ToString("dd.MM.yyyy")</small>
+                            </p>
+
+                            <div class="btn-group" role="group">
+                                <a asp-action="Details" asp-route-id="@group.Id" class="btn btn-sm btn-info">Detalji</a>
+                                <a asp-action="Members" asp-route-id="@group.Id" class="btn btn-sm btn-secondary">Članovi</a>
+                            </div>
+
+                            <div class="mt-2">
+                                <a asp-controller="Schedule" asp-action="Index" asp-route-groupId="@group.Id" class="btn btn-sm btn-outline-primary">
+                                    📅 Raspored
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+    else
+    {
+        <div class="alert alert-info">
+            Nemaš još grupa. <a asp-action="Create">Kreiraj prvu grupu</a>!
+        </div>
+    }
+</div>

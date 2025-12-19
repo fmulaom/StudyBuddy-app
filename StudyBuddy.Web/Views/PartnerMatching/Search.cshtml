@@ -1,0 +1,69 @@
+﻿@using StudyBuddy.Web.Models.ViewModels
+@model PartnerSearchViewModel
+
+@{
+    ViewData["Title"] = "Pretraži partnere";
+}
+
+<div class="container mt-5">
+    <h2>🔍 Pretraži partnere za učenje</h2>
+
+    <form asp-action="Search" asp-controller="PartnerMatching" method="post" class="mt-4">
+        @Html.AntiForgeryToken()
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label asp-for="Subject" class="form-label">Predmet</label>
+                <input asp-for="Subject" class="form-control" placeholder="Matematika, Fizika..." />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Faculty" class="form-label">Fakultet</label>
+                <input asp-for="Faculty" class="form-control" placeholder="FER, FF..." />
+            </div>
+            <div class="col-md-4 mb-3">
+                <label asp-for="Level" class="form-label">Razina znanja</label>
+                <select asp-for="Level" class="form-select">
+                    <option value="">-- Odaberi --</option>
+                    <option value="Beginner">Početnik</option>
+                    <option value="Intermediate">Srednja razina</option>
+                    <option value="Advanced">Napredna razina</option>
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary">Pretraži</button>
+        <a asp-action="Index" asp-controller="PartnerMatching" class="btn btn-secondary">Nazad na automatsko podudaranje</a>
+    </form>
+
+    @if (Model?.Results != null && Model.Results.Count > 0)
+    {
+        <h3 class="mt-5">Rezultati (@Model.Results.Count)</h3>
+        <table class="table table-hover mt-3">
+            <thead class="table-dark">
+                <tr>
+                    <th>Predmet</th>
+                    <th>Fakultet</th>
+                    <th>Razina</th>
+                    <th>Akcija</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var partner in Model.Results)
+                {
+                    <tr>
+                        <td>@partner.Subject</td>
+                        <td>@partner.Faculty</td>
+                        <td><span class="badge bg-info">@partner.Level</span></td>
+                        <td>
+                            <a href="#" class="btn btn-sm btn-primary">Zahtjev</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else if (ViewBag.Searched == true)
+    {
+        <div class="alert alert-warning mt-5">
+            Nema pronađenih partnera s tom kombinacijom filtara.
+        </div>
+    }
+</div>

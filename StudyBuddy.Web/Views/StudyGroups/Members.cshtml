@@ -1,0 +1,82 @@
+﻿@using StudyBuddy.Web.Models.ViewModels
+@model GroupDetailsViewModel
+
+@{
+    ViewData["Title"] = "Članovi grupe";
+}
+
+<div class="container mt-5">
+    <h2>Članovi grupe: @Model.Group.Name</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-8">
+            @if (Model.Members?.Count > 0)
+            {
+                <table class="table table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Korisnik ID</th>
+                            <th>Uloga</th>
+                            <th>Pridružen</th>
+                            <th>Akcija</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var member in Model.Members)
+                        {
+                            <tr>
+                                <td>@member.UserId</td>
+                                <td><span class="badge bg-secondary">@member.Role</span></td>
+                                <td>@member.JoinedAt.ToString("dd.MM.yyyy")</td>
+                                <td>
+                                    @if (member.Role != "Owner")
+                                    {
+                                        <form asp-action="RemoveMember" asp-route-groupId="@Model.Group.Id"
+                                              asp-route-userId="@member.UserId" method="post" style="display:inline;">
+                                            <button type="submit" class="btn btn-sm btn-danger"
+                                                    onclick="return confirm('Sigurno?')">
+                                                Ukloni
+                                            </button>
+                                        </form>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info">Nema članova u grupi.</div>
+            }
+        </div>
+
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">➕ Dodaj člana</h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="AddMember" asp-route-groupId="@Model.Group.Id" method="post">
+                        <div class="mb-3">
+                            <label for="UserId" class="form-label">Korisnik ID</label>
+                            <input type="text" name="userId" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="Role" class="form-label">Uloga</label>
+                            <select name="role" class="form-select">
+                                <option value="Member">Član</option>
+                                <option value="Admin">Admin</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Dodaj</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4">
+        <a asp-action="Details" asp-route-id="@Model.Group.Id" class="btn btn-secondary">Nazad na detalje</a>
+    </div>
+</div>
