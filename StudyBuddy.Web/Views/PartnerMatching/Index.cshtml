@@ -2,21 +2,21 @@
 @model PartnerSearchViewModel
 
 @{
-    ViewData["Title"] = "Pronađi partnera za učenje";
+    ViewData["Title"] = "Find Study Partner";
 }
 
 <div class="container mt-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <div>
-            <h2>🎓 Automatsko podudaranje partnera</h2>
+            <h2>Automatic Partner Matching</h2>
             <p class="text-muted mb-0">
-                Evo preporučenih partnera za učenje na osnovu tvojih interesa.
+                Here are recommended study partners based on your interests.
             </p>
         </div>
         <a asp-action="EditProfile"
            asp-controller="PartnerMatching"
            class="btn btn-outline-primary">
-            ✏️ Uredi moj profil
+            Edit My Profile
         </a>
     </div>
 
@@ -30,8 +30,8 @@
                         <div class="card-body d-flex flex-column">
                             <h5 class="card-title">@partner.Subject</h5>
                             <p class="card-text mb-2">
-                                <strong>Fakultet:</strong> @partner.Faculty<br />
-                                <strong>Razina:</strong> <span class="badge bg-info">@partner.Level</span>
+                                <strong>Faculty:</strong> @partner.Faculty<br />
+                                <strong>Level:</strong> <span class="badge bg-info">@partner.Level</span>
                             </p>
 
                             <div class="mt-auto">
@@ -43,13 +43,13 @@
                                     @Html.AntiForgeryToken()
                                     <button type="submit"
                                             class="btn btn-sm @(partner.IsFavorite ? "btn-warning" : "btn-outline-warning")">
-                                        @(partner.IsFavorite ? "★ Omiljeni" : "☆ Označi kao omiljeni")
+                                        @(partner.IsFavorite ? "Favorite" : "Mark as Favorite")
                                     </button>
                                 </form>
 
                                 <a href="#"
                                    class="btn btn-sm btn-primary ms-1">
-                                    Pošalji zahtjev
+                                    Send Request
                                 </a>
                             </div>
                         </div>
@@ -61,10 +61,10 @@
     else
     {
         <div class="alert alert-info mt-4">
-            Nema pronađenih podudaranja za tvoj trenutni profil.
-            <a asp-action="EditProfile" asp-controller="PartnerMatching">Uredi profil</a>
-            ili
-            <a asp-action="Search" asp-controller="PartnerMatching">pokušaj ručnu pretragu</a>.
+            No matches found for your current profile.
+            <a asp-action="EditProfile" asp-controller="PartnerMatching">Edit profile</a>
+            or
+            <a asp-action="Search" asp-controller="PartnerMatching">try manual search</a>.
         </div>
     }
 
@@ -72,7 +72,7 @@
         <a asp-action="Search"
            asp-controller="PartnerMatching"
            class="btn btn-secondary">
-            🔍 Ručna pretraga partnera
+            Manual Partner Search
         </a>
     </div>
 </div>

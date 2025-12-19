@@ -2,44 +2,44 @@
 @model EditStudyProfileViewModel
 
 @{
-    ViewData["Title"] = "Moj profil za učenje";
+    ViewData["Title"] = "My Study Profile";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <h2>🎯 Moj profil za učenje</h2>
-            <p class="text-muted">Postavi predmet, fakultet i razinu znanja da bi podudaranje radilo bolje.</p>
+            <h2>My Study Profile</h2>
+            <p class="text-muted">Set your subject, faculty, and level of knowledge to make matching work better.</p>
 
             <form asp-action="EditProfile" asp-controller="PartnerMatching" method="post" class="mt-4">
                 @Html.AntiForgeryToken()
 
                 <div class="mb-3">
-                    <label asp-for="Subject" class="form-label">Predmet *</label>
-                    <input asp-for="Subject" class="form-control" placeholder="npr. Matematika 1" />
+                    <label asp-for="Subject" class="form-label">Subject *</label>
+                    <input asp-for="Subject" class="form-control" placeholder="e.g. Mathematics 1" />
                     <span asp-validation-for="Subject" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Faculty" class="form-label">Fakultet *</label>
-                    <input asp-for="Faculty" class="form-control" placeholder="npr. FER" />
+                    <label asp-for="Faculty" class="form-label">Faculty *</label>
+                    <input asp-for="Faculty" class="form-control" placeholder="e.g. FER" />
                     <span asp-validation-for="Faculty" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Level" class="form-label">Razina znanja *</label>
+                    <label asp-for="Level" class="form-label">Knowledge Level *</label>
                     <select asp-for="Level" class="form-select">
-                        <option value="">-- Odaberi --</option>
-                        <option value="Beginner">Početnik</option>
-                        <option value="Intermediate">Srednja razina</option>
-                        <option value="Advanced">Napredna razina</option>
+                        <option value="">-- Select --</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
                     </select>
                     <span asp-validation-for="Level" class="text-danger"></span>
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-success btn-lg">Spremi profil</button>
-                    <a asp-action="Index" asp-controller="PartnerMatching" class="btn btn-secondary">Nazad</a>
+                    <button type="submit" class="btn btn-success btn-lg">Save Profile</button>
+                    <a asp-action="Index" asp-controller="PartnerMatching" class="btn btn-secondary">Back</a>
                 </div>
             </form>
         </div>

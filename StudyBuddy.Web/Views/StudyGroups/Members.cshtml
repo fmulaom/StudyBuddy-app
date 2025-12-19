@@ -2,11 +2,11 @@
 @model GroupDetailsViewModel
 
 @{
-    ViewData["Title"] = "Članovi grupe";
+    ViewData["Title"] = "Group Members";
 }
 
 <div class="container mt-5">
-    <h2>Članovi grupe: @Model.Group.Name</h2>
+    <h2>Group Members: @Model.Group.Name</h2>
 
     <div class="row mt-4">
         <div class="col-md-8">
@@ -15,10 +15,10 @@
                 <table class="table table-striped">
                     <thead class="table-dark">
                         <tr>
-                            <th>Korisnik ID</th>
-                            <th>Uloga</th>
-                            <th>Pridružen</th>
-                            <th>Akcija</th>
+                            <th>User ID</th>
+                            <th>Role</th>
+                            <th>Joined</th>
+                            <th>Action</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -34,8 +34,8 @@
                                         <form asp-action="RemoveMember" asp-route-groupId="@Model.Group.Id"
                                               asp-route-userId="@member.UserId" method="post" style="display:inline;">
                                             <button type="submit" class="btn btn-sm btn-danger"
-                                                    onclick="return confirm('Sigurno?')">
-                                                Ukloni
+                                                    onclick="return confirm('Are you sure?')">
+                                                Remove
                                             </button>
                                         </form>
                                     }
@@ -47,29 +47,29 @@
             }
             else
             {
-                <div class="alert alert-info">Nema članova u grupi.</div>
+                <div class="alert alert-info">No members in the group.</div>
             }
         </div>
 
         <div class="col-md-4">
             <div class="card">
                 <div class="card-header bg-success text-white">
-                    <h5 class="mb-0">➕ Dodaj člana</h5>
+                    <h5 class="mb-0">➕ Add Member</h5>
                 </div>
                 <div class="card-body">
                     <form asp-action="AddMember" asp-route-groupId="@Model.Group.Id" method="post">
                         <div class="mb-3">
-                            <label for="UserId" class="form-label">Korisnik ID</label>
+                            <label for="UserId" class="form-label">User ID</label>
                             <input type="text" name="userId" class="form-control" required>
                         </div>
                         <div class="mb-3">
-                            <label for="Role" class="form-label">Uloga</label>
+                            <label for="Role" class="form-label">Role</label>
                             <select name="role" class="form-select">
-                                <option value="Member">Član</option>
+                                <option value="Member">Member</option>
                                 <option value="Admin">Admin</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-success w-100">Dodaj</button>
+                        <button type="submit" class="btn btn-success w-100">Add</button>
                     </form>
                 </div>
             </div>
@@ -77,6 +77,6 @@
     </div>
 
     <div class="mt-4">
-        <a asp-action="Details" asp-route-id="@Model.Group.Id" class="btn btn-secondary">Nazad na detalje</a>
+        <a asp-action="Details" asp-route-id="@Model.Group.Id" class="btn btn-secondary">Back to Details</a>
     </div>
 </div>
