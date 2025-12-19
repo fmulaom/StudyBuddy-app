@@ -2,13 +2,13 @@
 @model ScheduleSessionViewModel
 
 @{
-    ViewData["Title"] = "Zakaži novu sesiju";
+    ViewData["Title"] = "Schedule New Session";
 }
 
 <div class="container mt-5">
     <div class="row justify-content-center">
         <div class="col-md-6">
-            <h2>📅 Zakaži novu sesiju</h2>
+            <h2>Schedule New Session</h2>
 
             <form asp-action="Create" method="post" class="mt-4">
                 <div asp-validation-summary="ModelOnly" class="alert alert-danger"></div>
@@ -16,27 +16,27 @@
                 <input type="hidden" asp-for="GroupId">
 
                 <div class="mb-3">
-                    <label asp-for="StartTime" class="form-label">Početak sesije *</label>
+                    <label asp-for="StartTime" class="form-label">Session Start *</label>
                     <input asp-for="StartTime" type="datetime-local" class="form-control" required>
                     <span asp-validation-for="StartTime" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="EndTime" class="form-label">Kraj sesije *</label>
+                    <label asp-for="EndTime" class="form-label">Session End *</label>
                     <input asp-for="EndTime" type="datetime-local" class="form-control" required>
                     <span asp-validation-for="EndTime" class="text-danger"></span>
                 </div>
 
                 <div class="mb-3">
-                    <label asp-for="Location" class="form-label">Lokacija *</label>
+                    <label asp-for="Location" class="form-label">Location *</label>
                     <input asp-for="Location" class="form-control"
-                           placeholder="npr. Online Teams, Učionica 105, Knjižnica">
+                           placeholder="e.g. Online Teams, Classroom 105, Library">
                     <span asp-validation-for="Location" class="text-danger"></span>
                 </div>
 
                 <div class="d-grid gap-2">
-                    <button type="submit" class="btn btn-success btn-lg">Zakaži sesiju</button>
-                    <a asp-action="Index" asp-route-groupId="@Model.GroupId" class="btn btn-secondary">Nazad</a>
+                    <button type="submit" class="btn btn-success btn-lg">Schedule Session</button>
+                    <a asp-action="Index" asp-route-groupId="@Model.GroupId" class="btn btn-secondary">Back</a>
                 </div>
             </form>
         </div>

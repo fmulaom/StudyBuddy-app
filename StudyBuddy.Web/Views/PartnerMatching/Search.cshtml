@@ -2,47 +2,47 @@
 @model PartnerSearchViewModel
 
 @{
-    ViewData["Title"] = "Pretraži partnere";
+    ViewData["Title"] = "Search Partners";
 }
 
 <div class="container mt-5">
-    <h2>🔍 Pretraži partnere za učenje</h2>
+    <h2>Search Study Partners</h2>
 
     <form asp-action="Search" asp-controller="PartnerMatching" method="post" class="mt-4">
         @Html.AntiForgeryToken()
         <div class="row">
             <div class="col-md-4 mb-3">
-                <label asp-for="Subject" class="form-label">Predmet</label>
-                <input asp-for="Subject" class="form-control" placeholder="Matematika, Fizika..." />
+                <label asp-for="Subject" class="form-label">Subject</label>
+                <input asp-for="Subject" class="form-control" placeholder="Mathematics, Physics..." />
             </div>
             <div class="col-md-4 mb-3">
-                <label asp-for="Faculty" class="form-label">Fakultet</label>
+                <label asp-for="Faculty" class="form-label">Faculty</label>
                 <input asp-for="Faculty" class="form-control" placeholder="FER, FF..." />
             </div>
             <div class="col-md-4 mb-3">
-                <label asp-for="Level" class="form-label">Razina znanja</label>
+                <label asp-for="Level" class="form-label">Knowledge Level</label>
                 <select asp-for="Level" class="form-select">
-                    <option value="">-- Odaberi --</option>
-                    <option value="Beginner">Početnik</option>
-                    <option value="Intermediate">Srednja razina</option>
-                    <option value="Advanced">Napredna razina</option>
+                    <option value="">-- Select --</option>
+                    <option value="Beginner">Beginner</option>
+                    <option value="Intermediate">Intermediate</option>
+                    <option value="Advanced">Advanced</option>
                 </select>
             </div>
         </div>
-        <button type="submit" class="btn btn-primary">Pretraži</button>
-        <a asp-action="Index" asp-controller="PartnerMatching" class="btn btn-secondary">Nazad na automatsko podudaranje</a>
+        <button type="submit" class="btn btn-primary">Search</button>
+        <a asp-action="Index" asp-controller="PartnerMatching" class="btn btn-secondary">Back to Automatic Matching</a>
     </form>
 
     @if (Model?.Results != null && Model.Results.Count > 0)
     {
-        <h3 class="mt-5">Rezultati (@Model.Results.Count)</h3>
+        <h3 class="mt-5">Results (@Model.Results.Count)</h3>
         <table class="table table-hover mt-3">
             <thead class="table-dark">
                 <tr>
-                    <th>Predmet</th>
-                    <th>Fakultet</th>
-                    <th>Razina</th>
-                    <th>Akcija</th>
+                    <th>Subject</th>
+                    <th>Faculty</th>
+                    <th>Level</th>
+                    <th>Action</th>
                 </tr>
             </thead>
             <tbody>
@@ -53,7 +53,7 @@
                         <td>@partner.Faculty</td>
                         <td><span class="badge bg-info">@partner.Level</span></td>
                         <td>
-                            <a href="#" class="btn btn-sm btn-primary">Zahtjev</a>
+                            <a href="#" class="btn btn-sm btn-primary">Request</a>
                         </td>
                     </tr>
                 }
@@ -63,7 +63,7 @@
     else if (ViewBag.Searched == true)
     {
         <div class="alert alert-warning mt-5">
-            Nema pronađenih partnera s tom kombinacijom filtara.
+            No partners found with that filter combination.
         </div>
     }
 </div>
