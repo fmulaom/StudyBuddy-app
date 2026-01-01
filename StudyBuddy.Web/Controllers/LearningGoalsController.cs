@@ -1,28 +1,26 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using StudyBuddy.Web.Data;
 using StudyBuddy.Web.Models;
+using StudyBuddy.Web.Services;
+using StudyBuddy.Web.Services.Interfaces;
+using StudyBuddy.Web.Services.LearningGoalConfig;
 
 namespace StudyBuddy.Web.Controllers
 {
     [Authorize]
-    // S - Single Responsibility:
-   
     public class LearningGoalsController : Controller
     {
-        // D - Dependency Inversion:
-      
-        private readonly ApplicationDbContext _context;
         private readonly UserManager<ApplicationUser> _userManager;
+        private readonly ILearningGoalFacade _facade;
+        private readonly LearningGoalConfig _config = LearningGoalConfig.Instance; // SINGLETON
 
         public LearningGoalsController(
-            ApplicationDbContext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            ILearningGoalFacade facade)
         {
-            _context = context;
             _userManager = userManager;
+            _facade = facade;
         }
 
         // GET: /LearningGoals
@@ -30,23 +28,20 @@ namespace StudyBuddy.Web.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            var goals = await _context.LearningGoals
-                .Where(g => g.UserId == userId)
-                .OrderBy(g => g.TargetDate)
-                .ToListAsync();
+            // FACADE – umjesto direktnog _context
+            var goals = await _facade.GetMyGoalsAsync(userId);
 
-            // S - Controller samo dohvaća podatke i šalje ih u view,
-            
             return View(goals);
         }
 
         // GET: /LearningGoals/Create
         public IActionResult Create()
         {
+            // SINGLETON – konfiguracija default vrijednosti
             var model = new LearningGoal
             {
-                TargetDate = DateTime.Today.AddDays(7),
-                Progress = 0
+                TargetDate = DateTime.Today.AddDays(_config.DefaultDaysFromToday),
+                Progress = _config.DefaultProgress
             };
 
             return View(model);
@@ -55,19 +50,18 @@ namespace StudyBuddy.Web.Controllers
         // POST: /LearningGoals/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(LearningGoal learningGoal)
+        public async Task<IActionResult> Create(LearningGoal model)
         {
             if (!ModelState.IsValid)
             {
-                return View(learningGoal);
+                return View(model);
             }
 
-            learningGoal.UserId = _userManager.GetUserId(User);
+            var userId = _userManager.GetUserId(User);
 
-            _context.LearningGoals.Add(learningGoal);
-            await _context.SaveChangesAsync();
+            // FACADE – unutar sebe poziva ILearningGoalService
+            await _facade.CreateMyGoalAsync(userId, model);
 
-           
             return RedirectToAction(nameof(Index));
         }
 
@@ -76,8 +70,9 @@ namespace StudyBuddy.Web.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            var goal = await _context.LearningGoals
-                .FirstOrDefaultAsync(g => g.Id == id && g.UserId == userId);
+            // Preko FACADE dohvaćamo ciljeve pa filtriramo po id
+            var goals = await _facade.GetMyGoalsAsync(userId);
+            var goal = goals.FirstOrDefault(g => g.Id == id);
 
             if (goal == null)
             {
@@ -92,27 +87,15 @@ namespace StudyBuddy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(LearningGoal model)
         {
-            var userId = _userManager.GetUserId(User);
-
             if (!ModelState.IsValid)
             {
                 return View(model);
             }
 
-            var goal = await _context.LearningGoals
-                .FirstOrDefaultAsync(g => g.Id == model.Id && g.UserId == userId);
+            var userId = _userManager.GetUserId(User);
 
-            if (goal == null)
-            {
-                return NotFound();
-            }
-
-            goal.Title = model.Title;
-            goal.Description = model.Description;
-            goal.TargetDate = model.TargetDate;
-            goal.Progress = model.Progress;
-
-            await _context.SaveChangesAsync();
+            // FACADE → ILearningGoalService → STRATEGY za progress
+            await _facade.UpdateMyGoalAsync(userId, model);
 
             return RedirectToAction(nameof(Index));
         }
@@ -124,16 +107,8 @@ namespace StudyBuddy.Web.Controllers
         {
             var userId = _userManager.GetUserId(User);
 
-            var goal = await _context.LearningGoals
-                .FirstOrDefaultAsync(g => g.Id == id && g.UserId == userId);
-
-            if (goal == null)
-            {
-                return NotFound();
-            }
-
-            _context.LearningGoals.Remove(goal);
-            await _context.SaveChangesAsync();
+            // FACADE – brisanje cilja za korisnika
+            await _facade.DeleteMyGoalAsync(userId, id);
 
             return RedirectToAction(nameof(Index));
         }

@@ -1,12 +1,19 @@
 using Microsoft.EntityFrameworkCore;
 using StudyBuddy.Web.Data;
-using StudyBuddy.Web.Models;
 using StudyBuddy.Web.Extensions;
+using StudyBuddy.Web.Models;
+using StudyBuddy.Web.Services.Interfaces;
+using StudyBuddy.Web.Services.LearningGoalConfig;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ---------------- DB & Identity ----------------
 
+
+builder.Services.AddScoped<ILearningGoalProgressStrategy, DeadlineAwareProgressStrategy>();
+builder.Services.AddScoped<ILearningGoalService, LearningGoalService>();
+builder.Services.AddScoped<ILearningGoalFacade, LearningGoalFacade>();
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
                        ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 
@@ -23,8 +30,10 @@ builder.Services
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
 // ---------------- MVC / Razor ----------------
-
+builder.Services.AddScoped<ILearningGoalService, LearningGoalService>();
+builder.Services.AddScoped<ILearningGoalProgressStrategy, DeadlineAwareProgressStrategy>();
 builder.Services.AddControllersWithViews();
+builder.Services.AddScoped<ILearningGoalProgressStrategy, DeadlineAwareProgressStrategy>();
 builder.Services.AddRazorPages();
 
 // ---------------- StudyBuddy modul (SOLID) ----------------
