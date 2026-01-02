@@ -15,42 +15,33 @@ namespace StudyBuddy.Web.Controllers
             IPartnerMatchingService matchingService,
             IRepository<StudyPartner> partnerRepository)
         {
-            _matchingService = matchingService ?? throw new ArgumentNullException(nameof(matchingService));
-            _partnerRepository = partnerRepository ?? throw new ArgumentNullException(nameof(partnerRepository));
+            _matchingService = matchingService;
+            _partnerRepository = partnerRepository;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-                return Challenge();
-
+            var userId = GetUserId();
             var matches = await _matchingService.GetAutomaticMatchesAsync(userId);
-            var vm = new PartnerSearchViewModel { Results = matches.ToList() };
-            return View(vm);
+            return View(new PartnerSearchViewModel { Results = matches.ToList() });
         }
 
         [HttpGet]
         public IActionResult Search()
         {
-            var vm = new PartnerSearchViewModel
-            {
-                Results = new List<StudyPartner>()
-            };
             ViewBag.Searched = false;
-            return View(vm);
+            return View(new PartnerSearchViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(PartnerSearchViewModel model)
         {
-            var subject = model.Subject ?? string.Empty;
-            var faculty = model.Faculty ?? string.Empty;
-            var level = model.Level ?? string.Empty;
-
-            var results = await _matchingService.SearchPartnersAsync(subject, faculty, level);
+            var results = await _matchingService.SearchPartnersAsync(
+                model.Subject ?? "",
+                model.Faculty ?? "",
+                model.Level ?? "");
 
             model.Results = results.ToList();
             ViewBag.Searched = true;
@@ -61,10 +52,7 @@ namespace StudyBuddy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> MarkFavorite(int partnerId)
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-                return Challenge();
-
+            var userId = GetUserId();
             await _matchingService.MarkFavoriteAsync(userId, partnerId);
             return RedirectToAction(nameof(Index));
         }
@@ -72,35 +60,33 @@ namespace StudyBuddy.Web.Controllers
         [HttpGet]
         public async Task<IActionResult> EditProfile()
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-                return Challenge();
+            var userId = GetUserId();
+            var existing = (await _partnerRepository.GetWhereAsync(x => x.UserId == userId)).FirstOrDefault();
 
-            var existing = (await _partnerRepository
-                .GetWhereAsync(x => x.UserId == userId))
-                .FirstOrDefault();
-
-            var vm = new EditStudyProfileViewModel
+            return View(new EditStudyProfileViewModel
             {
-                Subject = existing?.Subject ?? string.Empty,
-                Faculty = existing?.Faculty ?? string.Empty,
-                Level = existing?.Level ?? string.Empty
-            };
-
-            return View(vm);
+                Subject = existing?.Subject ?? "",
+                Faculty = existing?.Faculty ?? "",
+                Level = existing?.Level ?? ""
+            });
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditProfile(EditStudyProfileViewModel model)
         {
-            if (!ModelState.IsValid)
-                return View(model);
+            if (!ModelState.IsValid) return View(model);
 
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (string.IsNullOrEmpty(userId))
-                return Challenge();
+            var userId = GetUserId();
+            await UpsertPartnerProfileAsync(userId, model);
+            return RedirectToAction(nameof(Index));
+        }
 
+        private string GetUserId() =>
+            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
+
+        private async Task UpsertPartnerProfileAsync(string userId, EditStudyProfileViewModel model)
+        {
             var existingList = await _partnerRepository.GetWhereAsync(x => x.UserId == userId);
             var existing = existingList.FirstOrDefault();
 
@@ -115,7 +101,6 @@ namespace StudyBuddy.Web.Controllers
                     IsFavorite = false,
                     CreatedAt = DateTime.UtcNow
                 };
-
                 await _partnerRepository.AddAsync(partner);
             }
             else
@@ -123,11 +108,8 @@ namespace StudyBuddy.Web.Controllers
                 existing.Subject = model.Subject;
                 existing.Faculty = model.Faculty;
                 existing.Level = model.Level;
-
                 await _partnerRepository.UpdateAsync(existing);
             }
-
-            return RedirectToAction(nameof(Index));
         }
     }
 }
