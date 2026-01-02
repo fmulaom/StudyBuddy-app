@@ -1,6 +1,7 @@
-﻿using Microsoft.EntityFrameworkCore;
-using StudyBuddy.Web.Models;
+﻿using StudyBuddy.Web.Models;
+using StudyBuddy.Web.Models.Enums;
 using StudyBuddy.Web.Services.Interfaces;
+using StudyBuddy.Web.Services.MatchStrategy;
 
 namespace StudyBuddy.Web.Services.ServicesImplementation
 {
@@ -13,73 +14,41 @@ namespace StudyBuddy.Web.Services.ServicesImplementation
     /// </summary>
     public class PartnerMatchingService : IPartnerMatchingService
     {
+        private readonly IMatchingStrategyFactory _strategyFactory;
         private readonly IRepository<StudyPartner> _partnerRepository;
         private readonly ILogger<PartnerMatchingService> _logger;
 
-        // SOLID - DIP: Konstruktor prima interfejse, ne konkretne klase
-        public PartnerMatchingService(IRepository<StudyPartner> partnerRepository, ILogger<PartnerMatchingService> logger)
+        public PartnerMatchingService(
+            IMatchingStrategyFactory strategyFactory,
+            ILogger<PartnerMatchingService> logger,
+            IRepository<StudyPartner> partnerRepository)
         {
-            _partnerRepository = partnerRepository ?? throw new ArgumentNullException(nameof(partnerRepository));
-            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
+            _strategyFactory = strategyFactory;
+            _logger = logger;
+            _partnerRepository = partnerRepository;
         }
 
-        /// <summary>
-        /// SOLID - S: Ova metoda ima jednu odgovornost - pronalazak podudaranja.
-        /// Algoritam je odvojen u zasebnu metodu za lakše testiranje i održavanje.
-        /// </summary>
         public async Task<IReadOnlyList<StudyPartner>> GetAutomaticMatchesAsync(string userId)
         {
-            try
-            {
-                // SOLID - S: Pronalazi trenutnog korisnika
-                var currentPartner = await _partnerRepository.GetWhereAsync(x => x.UserId == userId);
-                if (!currentPartner.Any())
-                {
-                    _logger.LogWarning($"Partner s UserID {userId} nije pronađen.");
-                    return new List<StudyPartner>();
-                }
-
-                var partner = currentPartner.First();
-
-                // SOLID - S: Pronalazi samo potencijalne podudarke
-                var matches = await _partnerRepository.GetWhereAsync(x =>
-                    x.Id != partner.Id &&                           // Nije sам sebi
-                    x.Subject == partner.Subject &&                 // Isti predmet
-                    x.Level == partner.Level &&                     // Ista razina
-                    x.Faculty == partner.Faculty                    // Isti fakultet
-                );
-
-                _logger.LogInformation($"Pronađeno {matches.Count} podudaranja za {userId}.");
-                return matches;
-            }
-            catch (Exception ex)
-            {
-                // SOLID - S: Servis brinu se o greškama u podudaranju
-                _logger.LogError($"Greška pri pronalaženju podudaranja: {ex.Message}");
-                throw;
-            }
+            var criteria = new MatchingCriteria { Mode = MatchingMode.Automatic };
+            var strategy = _strategyFactory.GetStrategy(MatchingMode.ExactMatch);
+            var matches = await strategy.MatchAsync(userId, criteria);
+            return matches.ToList().AsReadOnly();
         }
 
-        /// <summary>
-        /// SOLID - S: Samo pretraživanje, bez dodatne logike.
-        /// SOLID - O (Open/Closed): Lako je dodati nove filtere bez mijenjanja postojećeg koda.
-        /// </summary>
-        public async Task<IReadOnlyList<StudyPartner>> SearchPartnersAsync(
-    string subject, string faculty, string level)
+        public async Task<IReadOnlyList<StudyPartner>> SearchPartnersAsync(string subject, string faculty, string level)
         {
-            var all = await _partnerRepository.GetWhereAsync(x => true);
-            var query = all.AsQueryable();
+            var criteria = new MatchingCriteria
+            {
+                Subject = subject,
+                Faculty = faculty,
+                Level = level,
+                Mode = MatchingMode.FacultyPriority
+            };
 
-            if (!string.IsNullOrWhiteSpace(subject))
-                query = query.Where(x => x.Subject.Contains(subject));
-
-            if (!string.IsNullOrWhiteSpace(faculty))
-                query = query.Where(x => x.Faculty.Contains(faculty));
-
-            if (!string.IsNullOrWhiteSpace(level))
-                query = query.Where(x => x.Level == level);
-
-            return query.ToList();
+            var strategy = _strategyFactory.GetStrategy(criteria.Mode);
+            var matches = await strategy.MatchAsync(null, criteria);
+            return matches.ToList().AsReadOnly();
         }
 
 

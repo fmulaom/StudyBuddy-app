@@ -1,6 +1,8 @@
 ﻿using StudyBuddy.Web.Services.Interfaces;
+using StudyBuddy.Web.Services.MatchStrategy;
 using StudyBuddy.Web.Services.Repositories;
 using StudyBuddy.Web.Services.ServicesImplementation;
+using StudyBuddy.Web.Services.StudyGroupConfig;
 
 namespace StudyBuddy.Web.Extensions
 {
@@ -25,6 +27,11 @@ namespace StudyBuddy.Web.Extensions
             services.AddScoped<IStudyScheduleService, StudyScheduleService>();
             services.AddScoped<INotificationService, NotificationService>();
             services.AddScoped<IResourceService, ResourceService>();
+            services.AddScoped<IStudyGroupFacade, StudyGroupFacade>();
+            services.AddScoped<IMatchingStrategyFactory, MatchingStrategyFactory>();
+            services.AddScoped<ExactMatchStrategy>();
+            services.AddScoped<FacultyPriorityStrategy>();
+
 
             return services;
         }
