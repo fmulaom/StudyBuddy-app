@@ -33,7 +33,6 @@ public class StudyGroupsController : Controller
 
     public async Task<IActionResult> Details(int id)
     {
-        // Jednostavan service poziv (ostaje kao što je)
         var group = await _groupService.GetGroupByIdAsync(id);
         return group == null ? NotFound() : View(group);
     }
