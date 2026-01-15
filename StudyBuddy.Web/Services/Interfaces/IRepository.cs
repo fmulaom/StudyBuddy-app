@@ -7,6 +7,7 @@ namespace StudyBuddy.Web.Services.Interfaces
     /// SOLID - DIP: Abstraktni repozitorij za sve entitete.
     /// SOLID - Generic programiranje: Izbjegava duplikaciju koda.
     /// </summary>
+    /// Repo
     public interface IRepository<TEntity> where TEntity : class
     {
         Task<TEntity> GetByIdAsync(int id);
