@@ -93,9 +93,27 @@
         </div>
     </footer>
 
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery 3.7.1 - SAFE -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+            integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo="
+            crossorigin="anonymous"></script>
+
+    <!-- Bootstrap 5.3.6 - SAFE -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
+            crossorigin="anonymous"></script>
+
+    <!-- jQuery Validation 1.20.0 - SAFE (ne 1.19.5) -->
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation@1.20.0/dist/jquery.validate.min.js"
+            integrity="sha256-6J8u+7cGNFCvU7/TJCvhYrpJHBVEpE2jNXHg0XGSt4="
+            crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/jquery-validation-unobtrusive@3.2.12/jquery.validate.unobtrusive.min.js"
+            integrity="sha256-s2VF/3H0gk1FUBpLs8kGYXQgf7s5Y3I5F3W3zLBLFo="
+            crossorigin="anonymous"></script>
+
+    <!-- Your custom JS -->
     <script src="~/js/site.js" asp-append-version="true"></script>
+
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

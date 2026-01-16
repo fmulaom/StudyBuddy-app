@@ -60,16 +60,15 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
 
-    <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-
-    <script>
-        flatpickr("#dueDatePicker", {
-            dateFormat: "d/m/Y",
-            defaultDate: "today",
-            allowInput: false
+    <script nonce="@Context.Items["csp-nonce"]">
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof flatpickr !== 'undefined') {
+                flatpickr("#dueDatePicker", {
+                    dateFormat: "d/m/Y",
+                    defaultDate: "today",
+                    allowInput: false
+                });
+            }
         });
     </script>
 }
