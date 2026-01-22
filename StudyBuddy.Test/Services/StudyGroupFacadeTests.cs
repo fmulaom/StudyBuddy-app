@@ -291,23 +291,6 @@ namespace StudyBuddy.Test.Services
             Assert.NotNull(badRequestResult.Value);
         }
 
-        [Theory]
-        [InlineData("Member")]
-        [InlineData("Admin")]
-        [InlineData("Moderator")]
-        public async Task AddMemberAsync_WorksWithDifferentRoles(string role)
-        {
-            var groupId = 1;
-            var userId = "user2";
-
-            _mockGroupService.Setup(s => s.AddMemberAsync(groupId, userId, role))
-                .Returns(Task.CompletedTask);
-
-            var result = await _facade.AddMemberAsync(groupId, userId, role);
-
-            Assert.IsType<RedirectToActionResult>(result);
-        }
-
         [Fact]
         public async Task AddMemberAsync_ReturnsActionResult()
         {

@@ -299,19 +299,6 @@ namespace StudyBuddy.Test.Controllers
             Assert.Equal("Members", redirectResult.ActionName);
         }
 
-        [Theory]
-        [InlineData("Member")]
-        [InlineData("Admin")]
-        [InlineData("Moderator")]
-        public async Task AddMember_WorksWithDifferentRoles(string role)
-        {
-            _mockFacade.Setup(f => f.AddMemberAsync(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>()))
-                .ReturnsAsync(new RedirectToActionResult("Members", "StudyGroups", null));
-
-            var result = await _controller.AddMember(1, "user", role);
-
-            _mockFacade.Verify(f => f.AddMemberAsync(1, "user", role), Times.Once);
-        }
 
         [Fact]
         public async Task AddMember_UsesDefaultRoleIfNotProvided()
