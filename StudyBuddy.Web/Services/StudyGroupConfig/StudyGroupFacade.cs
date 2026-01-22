@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using StudyBuddy.Web.Models.ViewModels;
+using StudyBuddy.Web.Constants;
 using StudyBuddy.Web.Models;
+using StudyBuddy.Web.Models.ViewModels;
 using StudyBuddy.Web.Services.Interfaces;
-using System.Security.Cryptography;
-using System.Text;
+using StudyBuddy.Web.Services.Logging;
 
 namespace StudyBuddy.Web.Services.StudyGroupConfig
 {
@@ -14,23 +14,16 @@ namespace StudyBuddy.Web.Services.StudyGroupConfig
         private readonly IResourceService _resourceService;
         private readonly ILogger<StudyGroupFacade> _logger;
 
-        private static readonly HashSet<string> AllowedRoles = new(StringComparer.OrdinalIgnoreCase)
-        {
-            "Member",
-            "Admin",
-            "Owner"
-        };
-
         public StudyGroupFacade(
             IStudyGroupService groupService,
             IRepository<StudyGroupMember> memberRepo,
             IResourceService resourceService,
             ILogger<StudyGroupFacade> logger)
         {
-            _groupService = groupService;
-            _memberRepo = memberRepo;
-            _resourceService = resourceService;
-            _logger = logger;
+            _groupService = groupService ?? throw new ArgumentNullException(nameof(groupService));
+            _memberRepo = memberRepo ?? throw new ArgumentNullException(nameof(memberRepo));
+            _resourceService = resourceService ?? throw new ArgumentNullException(nameof(resourceService));
+            _logger = logger ?? throw new ArgumentNullException(nameof(logger));
         }
 
         public async Task<IEnumerable<StudyGroup>> GetUserGroupsAsync(string userId)
@@ -40,23 +33,24 @@ namespace StudyBuddy.Web.Services.StudyGroupConfig
 
         public async Task<IActionResult> CreateGroupAsync(CreateGroupViewModel model, string userId)
         {
-            if (model == null || string.IsNullOrEmpty(model.Name))
+            if (model == null || string.IsNullOrWhiteSpace(model.Name))
                 return new BadRequestResult();
 
             try
             {
                 var group = await _groupService.CreateGroupAsync(userId, model.Name);
 
-                _logger.LogInformation("Group created. GroupId {GroupId}, GroupName {GroupName}, CreatedBy {UserToken}",
+                _logger.LogInformation(
+                    "Group created. GroupId {GroupId}, GroupName {GroupName}, CreatedBy {UserToken}",
                     group.Id,
-                    LogSafe(group.Name),
-                    ToUserToken(userId));
+                    LogValue.Safe(group.Name),
+                    LogValue.UserToken(userId));
 
                 return new RedirectToActionResult("Index", "StudyGroups", null);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to create group. User {UserToken}", ToUserToken(userId));
+                _logger.LogError(ex, "Failed to create group. User {UserToken}", LogValue.UserToken(userId));
                 return new BadRequestObjectResult("Error creating group.");
             }
         }
@@ -78,12 +72,16 @@ namespace StudyBuddy.Web.Services.StudyGroupConfig
             };
         }
 
-        public async Task<IActionResult> AddMemberAsync(int groupId, string userId, string role = "Member")
+        public async Task<IActionResult> AddMemberAsync(int groupId, string userId, string role = StudyGroupRoles.Member)
         {
-            if (!AllowedRoles.Contains(role))
+            if (!StudyGroupRoles.IsAllowed(role))
             {
-                _logger.LogWarning("AddMember rejected. GroupId {GroupId}, Role {Role}, TargetUser {UserToken}",
-                    groupId, LogSafe(role), ToUserToken(userId));
+                _logger.LogWarning(
+                    "AddMember rejected. GroupId {GroupId}, Role {Role}, TargetUser {UserToken}",
+                    groupId,
+                    LogValue.Safe(role),
+                    LogValue.UserToken(userId));
+
                 return new BadRequestObjectResult("Invalid role.");
             }
 
@@ -91,15 +89,22 @@ namespace StudyBuddy.Web.Services.StudyGroupConfig
             {
                 await _groupService.AddMemberAsync(groupId, userId, role);
 
-                _logger.LogInformation("Member added. GroupId {GroupId}, Role {Role}, TargetUser {UserToken}",
-                    groupId, role, ToUserToken(userId));
+                _logger.LogInformation(
+                    "Member added. GroupId {GroupId}, Role {Role}, TargetUser {UserToken}",
+                    groupId,
+                    role,
+                    LogValue.UserToken(userId));
 
                 return new RedirectToActionResult("Members", "StudyGroups", new { id = groupId });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to add member. GroupId {GroupId}, TargetUser {UserToken}",
-                    groupId, ToUserToken(userId));
+                _logger.LogError(
+                    ex,
+                    "Failed to add member. GroupId {GroupId}, TargetUser {UserToken}",
+                    groupId,
+                    LogValue.UserToken(userId));
+
                 return new BadRequestObjectResult("Error adding member.");
             }
         }
@@ -110,15 +115,21 @@ namespace StudyBuddy.Web.Services.StudyGroupConfig
             {
                 await _groupService.RemoveMemberAsync(groupId, userId);
 
-                _logger.LogInformation("Member removed. GroupId {GroupId}, TargetUser {UserToken}",
-                    groupId, ToUserToken(userId));
+                _logger.LogInformation(
+                    "Member removed. GroupId {GroupId}, TargetUser {UserToken}",
+                    groupId,
+                    LogValue.UserToken(userId));
 
                 return new RedirectToActionResult("Members", "StudyGroups", new { id = groupId });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to remove member. GroupId {GroupId}, TargetUser {UserToken}",
-                    groupId, ToUserToken(userId));
+                _logger.LogError(
+                    ex,
+                    "Failed to remove member. GroupId {GroupId}, TargetUser {UserToken}",
+                    groupId,
+                    LogValue.UserToken(userId));
+
                 return new BadRequestObjectResult("Error removing member.");
             }
         }
@@ -127,28 +138,6 @@ namespace StudyBuddy.Web.Services.StudyGroupConfig
         {
             var g = await _groupService.GetGroupByIdAsync(id);
             return g == null ? new NotFoundResult() : new OkObjectResult(g);
-        }
-
-        private static string LogSafe(string? value)
-        {
-            if (string.IsNullOrEmpty(value)) return string.Empty;
-
-            var sb = new StringBuilder(value.Length);
-            foreach (var ch in value)
-            {
-                if (!char.IsControl(ch)) sb.Append(ch);
-            }
-
-            return sb.Length <= 64 ? sb.ToString() : sb.ToString(0, 64);
-        }
-
-        private static string ToUserToken(string? userId)
-        {
-            if (string.IsNullOrWhiteSpace(userId)) return "anonymous";
-
-            var cleaned = LogSafe(userId);
-            var hash = SHA256.HashData(Encoding.UTF8.GetBytes(cleaned));
-            return Convert.ToHexString(hash)[..12];
         }
     }
 }
