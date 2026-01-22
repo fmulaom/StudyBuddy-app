@@ -1,4 +1,6 @@
-﻿namespace StudyBuddy.Web.Constants;
+﻿using System.Collections.ObjectModel;
+
+namespace StudyBuddy.Web.Constants;
 
 public static class StudyGroupRoles
 {
@@ -6,11 +8,14 @@ public static class StudyGroupRoles
     public const string Admin = "Admin";
     public const string Owner = "Owner";
 
-    public static readonly ISet<string> Allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+    private static readonly HashSet<string> AllowedSet = new(StringComparer.OrdinalIgnoreCase)
     {
         Member, Admin, Owner
     };
 
+    public static IReadOnlyCollection<string> Allowed { get; } =
+        new ReadOnlyCollection<string>(AllowedSet.ToList());
+
     public static bool IsAllowed(string? role) =>
-        !string.IsNullOrWhiteSpace(role) && Allowed.Contains(role);
+        !string.IsNullOrWhiteSpace(role) && AllowedSet.Contains(role);
 }
