@@ -4,6 +4,7 @@ using StudyBuddy.Web.Services.Interfaces;
 using System.Security.Claims;
 
 namespace StudyBuddy.Web.Controllers;
+
 public class StudyGroupsController : Controller
 {
     private readonly IStudyGroupFacade _facade;
@@ -15,22 +16,36 @@ public class StudyGroupsController : Controller
         _groupService = groupService ?? throw new ArgumentNullException(nameof(groupService));
     }
 
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = GetUserId();
         var groups = await _facade.GetUserGroupsAsync(userId);
         return View(groups);
     }
 
-    public IActionResult Create() => View();
-
-    [HttpPost]
-    public async Task<IActionResult> Create(CreateGroupViewModel model)
+    [HttpGet]
+    public IActionResult Create()
     {
-        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        return await _facade.CreateGroupAsync(model, userId);
+        return View();
     }
 
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Create(CreateGroupViewModel model)
+    {
+        if (!ModelState.IsValid)
+            return View(model);
+
+        var userId = GetUserId();
+        var result = await _facade.CreateGroupAsync(model, userId);
+
+        // Ako façade vraća IActionResult (npr. RedirectToAction ili View s error),
+        // proslijedi direktno; ako vraća null, preusmjeri na Index
+        return result ?? RedirectToAction(nameof(Index));
+    }
+
+    [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
         var group = await _groupService.GetGroupByIdAsync(id);
@@ -44,14 +59,33 @@ public class StudyGroupsController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> AddMember(int groupId, string userId, string role = "Member")
     {
-        return await _facade.AddMemberAsync(groupId, userId, role);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            ModelState.AddModelError(string.Empty, "Korisnik nije ispravan.");
+            return RedirectToAction(nameof(Members), new { id = groupId });
+        }
+
+        var result = await _facade.AddMemberAsync(groupId, userId, role);
+        return result ?? RedirectToAction(nameof(Members), new { id = groupId });
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveMember(int groupId, string userId)
     {
-        return await _facade.RemoveMemberAsync(groupId, userId);
+        if (string.IsNullOrWhiteSpace(userId))
+        {
+            ModelState.AddModelError(string.Empty, "Korisnik nije ispravan.");
+            return RedirectToAction(nameof(Members), new { id = groupId });
+        }
+
+        var result = await _facade.RemoveMemberAsync(groupId, userId);
+        return result ?? RedirectToAction(nameof(Members), new { id = groupId });
     }
+
+    private string GetUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("Korisnik nije autentificiran.");
 }

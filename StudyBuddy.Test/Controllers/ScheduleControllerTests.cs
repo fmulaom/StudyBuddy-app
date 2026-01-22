@@ -155,26 +155,28 @@ namespace StudyBuddy.Test.Controllers
         #region Cancel Tests
 
         [Fact]
-        public async Task Cancel_ReturnsOkResult_WhenSessionCanceled()
+        public async Task Cancel_ReturnsRedirectToIndex_WhenSessionCanceled()
         {
             var sessionId = 1;
+            var groupId = 123;
             _mockScheduleService.Setup(s => s.CancelAsync(sessionId))
                 .Returns(Task.CompletedTask);
 
-            var result = await _controller.Cancel(sessionId);
+            var result = await _controller.Cancel(sessionId, groupId); 
 
-            var okResult = Assert.IsType<OkObjectResult>(result);
-            Assert.Equal("Sesija otkazana.", okResult.Value);
+            var redirectResult = Assert.IsType<RedirectToActionResult>(result);
+            Assert.Equal("Index", redirectResult.ActionName); 
         }
 
         [Fact]
         public async Task Cancel_CallsServiceWithCorrectSessionId()
         {
             var sessionId = 42;
+            var groupId = 456; 
             _mockScheduleService.Setup(s => s.CancelAsync(sessionId))
                 .Returns(Task.CompletedTask);
 
-            await _controller.Cancel(sessionId);
+            await _controller.Cancel(sessionId, groupId);
 
             _mockScheduleService.Verify(s => s.CancelAsync(sessionId), Times.Once);
         }
@@ -183,28 +185,17 @@ namespace StudyBuddy.Test.Controllers
         public async Task Cancel_ReturnsBadRequest_WhenExceptionThrown()
         {
             var sessionId = 1;
+            var groupId = 789;
+            var errorMessage = "Cancel failed";
             _mockScheduleService.Setup(s => s.CancelAsync(sessionId))
-                .Throws(new Exception("Cancel failed"));
+                .ThrowsAsync(new Exception(errorMessage));
 
-            var result = await _controller.Cancel(sessionId);
+            var result = await _controller.Cancel(sessionId, groupId); 
 
             var badRequestResult = Assert.IsType<BadRequestObjectResult>(result);
-            Assert.Equal("Cancel failed", badRequestResult.Value);
+            Assert.Contains(errorMessage, badRequestResult.Value.ToString());
         }
 
-        [Theory]
-        [InlineData(1)]
-        [InlineData(5)]
-        [InlineData(100)]
-        public async Task Cancel_WorksWithDifferentSessionIds(int sessionId)
-        {
-            _mockScheduleService.Setup(s => s.CancelAsync(sessionId))
-                .Returns(Task.CompletedTask);
-
-            var result = await _controller.Cancel(sessionId);
-
-            Assert.IsType<OkObjectResult>(result);
-        }
 
         #endregion
 

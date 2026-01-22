@@ -6,7 +6,7 @@ using StudyBuddy.Web.Data;
 using StudyBuddy.Web.Models;
 using StudyBuddy.Web.Models.ViewModels;
 using System.Globalization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+using System.Security.Claims;
 
 namespace StudyBuddy.Web.Controllers
 {
@@ -17,20 +17,21 @@ namespace StudyBuddy.Web.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
 
         public StudyTasksController(
-            ApplicationDbContext context, UserManager<ApplicationUser> userManager)
+            ApplicationDbContext context,
+            UserManager<ApplicationUser> userManager)
         {
-            _context = context;
-            _userManager = userManager;
+            _context = context ?? throw new ArgumentNullException(nameof(context));
+            _userManager = userManager ?? throw new ArgumentNullException(nameof(userManager));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(int weekOffset = 0)
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = GetUserId();
 
             var today = DateTime.Today;
             int diff = (7 + (today.DayOfWeek - DayOfWeek.Monday)) % 7;
             var baseWeekStart = today.AddDays(-diff).Date;
-
             var weekStart = baseWeekStart.AddDays(weekOffset * 7);
 
             var tasks = await _context.StudyTasks
@@ -50,17 +51,15 @@ namespace StudyBuddy.Web.Controllers
             };
 
             ViewBag.WeekOffset = weekOffset;
-
             return View(model);
         }
 
-        // GET: /StudyTasks/Create
+        [HttpGet]
         public IActionResult Create(string? date)
         {
             var model = new StudyTasks();
 
-            if (!string.IsNullOrEmpty(date) &&
-                DateTime.TryParse(date, out var parsedDate))
+            if (!string.IsNullOrEmpty(date) && DateTime.TryParse(date, CultureInfo.InvariantCulture, DateTimeStyles.AssumeLocal, out var parsedDate))
             {
                 model.DueDate = parsedDate;
             }
@@ -72,8 +71,6 @@ namespace StudyBuddy.Web.Controllers
             return View(model);
         }
 
-
-        // POST: /StudyTasks/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(StudyTasks studyTask)
@@ -83,7 +80,7 @@ namespace StudyBuddy.Web.Controllers
                 return View(studyTask);
             }
 
-            studyTask.UserId = _userManager.GetUserId(User);
+            studyTask.UserId = GetUserId();
 
             _context.StudyTasks.Add(studyTask);
             await _context.SaveChangesAsync();
@@ -95,7 +92,7 @@ namespace StudyBuddy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Delete(int id)
         {
-            var userId = _userManager.GetUserId(User);
+            var userId = GetUserId();
 
             var task = await _context.StudyTasks
                 .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
@@ -111,5 +108,56 @@ namespace StudyBuddy.Web.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Edit(int id)
+        {
+            var userId = GetUserId();
+
+            var task = await _context.StudyTasks
+                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+
+            if (task == null)
+            {
+                return NotFound();
+            }
+
+            return View(task);
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, StudyTasks studyTask)
+        {
+            if (id != studyTask.Id)
+            {
+                return BadRequest("ID mismatch.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                return View(studyTask);
+            }
+
+            var userId = GetUserId();
+            var existingTask = await _context.StudyTasks
+                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId);
+
+            if (existingTask == null)
+            {
+                return NotFound();
+            }
+
+            existingTask.Title = studyTask.Title;
+            existingTask.Description = studyTask.Description;
+            existingTask.DueDate = studyTask.DueDate;
+
+            _context.StudyTasks.Update(existingTask);
+            await _context.SaveChangesAsync();
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        private string GetUserId() =>
+            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("Korisnik nije autentificiran.");
     }
 }
