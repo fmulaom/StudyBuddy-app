@@ -90,11 +90,15 @@ namespace StudyBuddy.Test.Models
         }
 
         [Fact]
+        
         public void LearningGoal_CreatedAt_CanBeSet()
         {
             var goal = new LearningGoal();
-            var createdAt = DateTime.UtcNow;
+            var expected = DateTime.UtcNow;
 
+            goal.CreatedAt = expected;
+
+            Assert.Equal(expected, goal.CreatedAt);
         }
 
         #endregion
