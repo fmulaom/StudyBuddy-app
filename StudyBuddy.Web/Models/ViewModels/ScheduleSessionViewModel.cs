@@ -11,10 +11,10 @@ namespace StudyBuddy.Web.Models.ViewModels
         public int GroupId { get; set; }
 
         [Required]
-        public DateTime StartTime { get; set; }
+        public DateTime? StartTime { get; set; }
 
         [Required]
-        public DateTime EndTime { get; set; }
+        public DateTime? EndTime { get; set; }
 
         [Required]
         [StringLength(200)]
