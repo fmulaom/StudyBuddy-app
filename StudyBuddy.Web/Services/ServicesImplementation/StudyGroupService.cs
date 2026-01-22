@@ -3,10 +3,6 @@ using StudyBuddy.Web.Services.Interfaces;
 
 namespace StudyBuddy.Web.Services.ServicesImplementation
 {
-    /// <summary>
-    /// SOLID - S: Samo upravlja grupama. Raspored, notifikacije i resursi su odvojeni servisi.
-    /// SOLID - DIP: Koristi interfejse, ne konkretne klase.
-    /// </summary>
     public class StudyGroupService : IStudyGroupService
     {
         private readonly IRepository<StudyGroup> _groupRepository;
@@ -25,7 +21,6 @@ namespace StudyBuddy.Web.Services.ServicesImplementation
 
         public async Task<IReadOnlyList<StudyGroup>> GetUserGroupsAsync(string userId)
         {
-            // SOLID - S: Pronalazi samo grupe korisnika
             var userGroups = await _memberRepository.GetWhereAsync(x => x.UserId == userId);
             var groupIds = userGroups.Select(x => x.GroupId).ToList();
 
@@ -45,10 +40,6 @@ namespace StudyBuddy.Web.Services.ServicesImplementation
             return await _groupRepository.GetByIdAsync(groupId);
         }
 
-        /// <summary>
-        /// SOLID - S: Samo kreira grupu. 
-        /// Dodavanje članova je odvojena metoda - jedna odgovornost po metodi.
-        /// </summary>
         public async Task<StudyGroup> CreateGroupAsync(string ownerId, string name)
         {
             var group = new StudyGroup
@@ -62,7 +53,6 @@ namespace StudyBuddy.Web.Services.ServicesImplementation
             await _groupRepository.AddAsync(group);
             await _groupRepository.SaveChangesAsync();
 
-            // SOLID - S: Odmah dodaj vlasnika kao člana
             var ownerMember = new StudyGroupMember
             {
                 GroupId = group.Id,
@@ -74,16 +64,13 @@ namespace StudyBuddy.Web.Services.ServicesImplementation
             await _memberRepository.AddAsync(ownerMember);
             await _memberRepository.SaveChangesAsync();
 
-            _logger.LogInformation($"Grupa '{name}' kreirana od {ownerId}.");
+            _logger.LogInformation("Study group created. GroupId {GroupId}", group.Id);
+
             return group;
         }
 
-        /// <summary>
-        /// SOLID - S: Samo dodavanje člana.
-        /// </summary>
         public async Task AddMemberAsync(int groupId, string userId, string role = "Member")
         {
-            // SOLID - DIP: Koristi apstrakciju za validaciju
             var group = await _groupRepository.GetByIdAsync(groupId);
             if (group == null)
                 throw new KeyNotFoundException("Grupa nije pronađena.");
@@ -105,12 +92,9 @@ namespace StudyBuddy.Web.Services.ServicesImplementation
             await _memberRepository.AddAsync(member);
             await _memberRepository.SaveChangesAsync();
 
-            _logger.LogInformation($"Korisnik {userId} dodan u grupu {groupId} s ulogom {role}.");
+            _logger.LogInformation("Member added to study group. GroupId {GroupId}", groupId);
         }
 
-        /// <summary>
-        /// SOLID - S: Samo brisanje člana.
-        /// </summary>
         public async Task RemoveMemberAsync(int groupId, string userId)
         {
             var members = await _memberRepository.GetWhereAsync(x =>
@@ -121,7 +105,7 @@ namespace StudyBuddy.Web.Services.ServicesImplementation
 
             await _memberRepository.DeleteAsync(members.First());
 
-            _logger.LogInformation($"Korisnik {userId} uklonjen iz grupe {groupId}.");
+            _logger.LogInformation("Member removed from study group. GroupId {GroupId}", groupId);
         }
 
         public async Task DeleteGroupAsync(int groupId)
