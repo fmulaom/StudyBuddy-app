@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Moq;
 using StudyBuddy.Web.Controllers;
 using StudyBuddy.Web.Models;
@@ -15,6 +16,7 @@ namespace StudyBuddy.Test.Controllers
     {
         private readonly Mock<IStudyGroupFacade> _mockFacade;
         private readonly Mock<IStudyGroupService> _mockGroupService;
+        private readonly Mock<ILogger<StudyGroupsController>> _mockLogger;
         private readonly StudyGroupsController _controller;
         private const string TestUserId = "user-123";
 
@@ -22,8 +24,11 @@ namespace StudyBuddy.Test.Controllers
         {
             _mockFacade = new Mock<IStudyGroupFacade>();
             _mockGroupService = new Mock<IStudyGroupService>();
-            _controller = new StudyGroupsController(_mockFacade.Object, _mockGroupService.Object);
+            _mockLogger = new Mock<ILogger<StudyGroupsController>>();
 
+            _controller = new StudyGroupsController(_mockFacade.Object, _mockGroupService.Object, _mockLogger.Object);
+
+            SetupUserClaims(TestUserId);
             SetupUserClaims(TestUserId);
         }
 
@@ -385,15 +390,16 @@ namespace StudyBuddy.Test.Controllers
         public void Constructor_ThrowsArgumentNullException_WhenFacadeIsNull()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                new StudyGroupsController(null, _mockGroupService.Object));
+                new StudyGroupsController(null, _mockGroupService.Object, _mockLogger.Object));
         }
 
         [Fact]
         public void Constructor_ThrowsArgumentNullException_WhenServiceIsNull()
         {
             Assert.Throws<ArgumentNullException>(() =>
-                new StudyGroupsController(_mockFacade.Object, null));
+                new StudyGroupsController(_mockFacade.Object, null, _mockLogger.Object));
         }
+
 
         #endregion
 
