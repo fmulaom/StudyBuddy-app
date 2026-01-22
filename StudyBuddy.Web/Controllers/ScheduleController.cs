@@ -1,27 +1,28 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using StudyBuddy.Web.Models.ViewModels;
 using StudyBuddy.Web.Services.Interfaces;
+using System.Security.Claims;
 
 namespace StudyBuddy.Web.Controllers
 {
     /// <summary>
     /// SOLID - S: Samo HTTP routing i delegiranje.
-    /// SOLID - DIP: Koristi IStudyScheduleService i INotificationService interfejse.
+    /// SOLID - DIP: Koristi IStudyScheduleService i IStudyGroupService interfejse.
     /// </summary>
-    public class ScheduleController : Controller 
+    public class ScheduleController : Controller
     {
         private readonly IStudyScheduleService _studyScheduleService;
         private readonly IStudyGroupService _groupService;
 
         public ScheduleController(
             IStudyScheduleService studyScheduleService,
-            IStudyGroupService groupService
-            )
+            IStudyGroupService groupService)
         {
             _studyScheduleService = studyScheduleService ?? throw new ArgumentNullException(nameof(studyScheduleService));
             _groupService = groupService ?? throw new ArgumentNullException(nameof(groupService));
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(int groupId)
         {
             var group = await _groupService.GetGroupByIdAsync(groupId);
@@ -39,12 +40,14 @@ namespace StudyBuddy.Web.Controllers
             return View(vm);
         }
 
+        [HttpGet]
         public IActionResult Create(int groupId)
         {
             return View(new ScheduleSessionViewModel { GroupId = groupId });
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ScheduleSessionViewModel model)
         {
             if (!ModelState.IsValid)
@@ -52,27 +55,37 @@ namespace StudyBuddy.Web.Controllers
 
             try
             {
-                await _studyScheduleService.ScheduleAsync(model.GroupId, model.StartTime, model.EndTime, model.Location); // Updated field name
+                await _studyScheduleService.ScheduleAsync(
+                    model.GroupId,
+                    model.StartTime,
+                    model.EndTime,
+                    model.Location);
+
                 return RedirectToAction(nameof(Index), new { groupId = model.GroupId });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                ModelState.AddModelError(string.Empty, $"Greška pri kreiranju sesije: {ex.Message}");
+                return View(model);
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> Cancel(int sessionId)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Cancel(int sessionId, int groupId)
         {
             try
             {
                 await _studyScheduleService.CancelAsync(sessionId);
-                return Ok("Sesija otkazana.");
+                return RedirectToAction(nameof(Index), new { groupId = groupId });
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest($"Greška pri otkazivanju sesije: {ex.Message}");
             }
         }
+
+        private string GetUserId() =>
+            User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException();
     }
 }

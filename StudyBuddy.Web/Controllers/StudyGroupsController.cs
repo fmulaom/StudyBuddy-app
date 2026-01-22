@@ -23,6 +23,7 @@ public class StudyGroupsController : Controller
         _logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
+    [HttpGet]
     public async Task<IActionResult> Index()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -35,9 +36,14 @@ public class StudyGroupsController : Controller
         return View(groups);
     }
 
-    public IActionResult Create() => View();
+    [HttpGet]
+    public IActionResult Create()
+    {
+        return View();
+    }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> Create(CreateGroupViewModel model)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -49,6 +55,7 @@ public class StudyGroupsController : Controller
         return await _facade.CreateGroupAsync(model, userId);
     }
 
+    [HttpGet]
     public async Task<IActionResult> Details(int id)
     {
         _logger.LogDebug("Group details requested for groupId {GroupId}", id);
@@ -82,6 +89,7 @@ public class StudyGroupsController : Controller
     }
 
     [HttpPost]
+    [ValidateAntiForgeryToken]
     public async Task<IActionResult> RemoveMember(int groupId, string userId)
     {
         _logger.LogInformation("RemoveMember requested for groupId {GroupId}, targetUser {TargetUserToken}",
@@ -89,4 +97,7 @@ public class StudyGroupsController : Controller
 
         return await _facade.RemoveMemberAsync(groupId, userId);
     }
+
+    private string GetUserId() =>
+        User.FindFirstValue(ClaimTypes.NameIdentifier) ?? throw new UnauthorizedAccessException("Korisnik nije autentificiran.");
 }
