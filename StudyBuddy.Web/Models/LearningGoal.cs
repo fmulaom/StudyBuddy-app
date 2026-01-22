@@ -22,7 +22,7 @@ namespace StudyBuddy.Web.Models
         [Required]
         [DataType(DataType.Date)]
         public DateTime TargetDate { get; set; }
-
+        public DateTime CreatedAt { get; set; }
         [Range(0, 100)]
         public int Progress { get; set; }
     }

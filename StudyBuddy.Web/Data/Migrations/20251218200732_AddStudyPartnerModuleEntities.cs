@@ -8,20 +8,23 @@ namespace StudyBuddy.Web.Migrations
     /// <inheritdoc />
     public partial class AddStudyPartnerModuleEntities : Migration
     {
+        private const string STUDY_TASK = "StudyTasks";
+        private const string USER_ID = "UserId";
+        private const string ASP_NET_USERS = "AspNetUsers";
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_StudyTasks_AspNetUsers_UserId",
-                table: "StudyTasks");
+                name: $"FK_{STUDY_TASK}_{ASP_NET_USERS}_{USER_ID}",
+        table: STUDY_TASK);
 
             migrationBuilder.AlterColumn<string>(
-                name: "UserId",
-                table: "StudyTasks",
-                type: "nvarchar(450)",
-                nullable: true,
-                oldClrType: typeof(string),
-                oldType: "nvarchar(450)");
+                 name: USER_ID,
+        table: STUDY_TASK,
+        type: "nvarchar(450)",
+        nullable: true,
+        oldClrType: typeof(string),
+        oldType: "nvarchar(450)");
 
             migrationBuilder.CreateTable(
                 name: "StudyGroups",
@@ -143,19 +146,19 @@ namespace StudyBuddy.Web.Migrations
                 column: "GroupId");
 
             migrationBuilder.AddForeignKey(
-                name: "FK_StudyTasks_AspNetUsers_UserId",
-                table: "StudyTasks",
-                column: "UserId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id");
+                name: $"FK_{STUDY_TASK}_{ASP_NET_USERS}_{USER_ID}",
+        table: STUDY_TASK,
+        column: USER_ID,
+        principalTable: ASP_NET_USERS,
+        principalColumn: USER_ID);
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_StudyTasks_AspNetUsers_UserId",
-                table: "StudyTasks");
+                name: $"FK_{STUDY_TASK}_{ASP_NET_USERS}_{USER_ID}",
+        table: STUDY_TASK);
 
             migrationBuilder.DropTable(
                 name: "StudyGroupMembers");
@@ -183,12 +186,12 @@ namespace StudyBuddy.Web.Migrations
                 oldNullable: true);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_StudyTasks_AspNetUsers_UserId",
-                table: "StudyTasks",
-                column: "UserId",
-                principalTable: "AspNetUsers",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
+                name: $"FK_{STUDY_TASK}_{ASP_NET_USERS}_{USER_ID}",
+        table: STUDY_TASK,
+        column: USER_ID,
+        principalTable: ASP_NET_USERS,
+        principalColumn: USER_ID,
+        onDelete: ReferentialAction.Cascade);
         }
     }
 }
