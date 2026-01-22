@@ -38,6 +38,12 @@ namespace StudyBuddy.Web.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Search(PartnerSearchViewModel model)
         {
+            if (!ModelState.IsValid)
+            {
+                ViewBag.Searched = false;
+                return View(model);
+            }
+
             var results = await _matchingService.SearchPartnersAsync(
                 model.Subject ?? "",
                 model.Faculty ?? "",
