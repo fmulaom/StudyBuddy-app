@@ -33,6 +33,8 @@ public class StudyGroupsController : Controller
     public async Task<IActionResult> Index()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+            return Challenge();
 
         _logger.LogDebug("Listing study groups for user {UserToken}", ToUserToken(userId));
 
@@ -46,6 +48,8 @@ public class StudyGroupsController : Controller
     public async Task<IActionResult> Create(CreateGroupViewModel model)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrWhiteSpace(userId))
+            return Challenge();
 
         _logger.LogInformation("Create group requested by user {UserToken}", ToUserToken(userId));
 
