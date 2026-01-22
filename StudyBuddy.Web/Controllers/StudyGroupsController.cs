@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using StudyBuddy.Web.Constants;
 using StudyBuddy.Web.Models.ViewModels;
 using StudyBuddy.Web.Services.Interfaces;
+using StudyBuddy.Web.Services.Logging;
 using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace StudyBuddy.Web.Controllers;
 
@@ -12,13 +12,6 @@ public class StudyGroupsController : Controller
     private readonly IStudyGroupFacade _facade;
     private readonly IStudyGroupService _groupService;
     private readonly ILogger<StudyGroupsController> _logger;
-
-    private static readonly HashSet<string> AllowedRoles = new(StringComparer.OrdinalIgnoreCase)
-    {
-        "Member",
-        "Admin",
-        "Owner"
-    };
 
     public StudyGroupsController(
         IStudyGroupFacade facade,
@@ -36,7 +29,7 @@ public class StudyGroupsController : Controller
         if (string.IsNullOrWhiteSpace(userId))
             return Challenge();
 
-        _logger.LogDebug("Listing study groups for user {UserToken}", ToUserToken(userId));
+        _logger.LogDebug("Listing study groups for user {UserToken}", LogValue.UserToken(userId));
 
         var groups = await _facade.GetUserGroupsAsync(userId);
         return View(groups);
@@ -51,7 +44,7 @@ public class StudyGroupsController : Controller
         if (string.IsNullOrWhiteSpace(userId))
             return Challenge();
 
-        _logger.LogInformation("Create group requested by user {UserToken}", ToUserToken(userId));
+        _logger.LogInformation("Create group requested by user {UserToken}", LogValue.UserToken(userId));
 
         return await _facade.CreateGroupAsync(model, userId);
     }
@@ -73,17 +66,17 @@ public class StudyGroupsController : Controller
     }
 
     [HttpPost]
-    public async Task<IActionResult> AddMember(int groupId, string userId, string role = "Member")
+    public async Task<IActionResult> AddMember(int groupId, string userId, string role = StudyGroupRoles.Member)
     {
-        if (!AllowedRoles.Contains(role))
+        if (!StudyGroupRoles.IsAllowed(role))
         {
             _logger.LogWarning("AddMember rejected for groupId {GroupId}: invalid role {Role}",
-                groupId, LogSafe(role));
+                groupId, LogValue.Safe(role));
             return BadRequest("Invalid role.");
         }
 
         _logger.LogInformation("AddMember requested for groupId {GroupId}, targetUser {TargetUserToken}, role {Role}",
-            groupId, ToUserToken(userId), role);
+            groupId, LogValue.UserToken(userId), role);
 
         return await _facade.AddMemberAsync(groupId, userId, role);
     }
@@ -92,30 +85,8 @@ public class StudyGroupsController : Controller
     public async Task<IActionResult> RemoveMember(int groupId, string userId)
     {
         _logger.LogInformation("RemoveMember requested for groupId {GroupId}, targetUser {TargetUserToken}",
-            groupId, ToUserToken(userId));
+            groupId, LogValue.UserToken(userId));
 
         return await _facade.RemoveMemberAsync(groupId, userId);
-    }
-
-    private static string LogSafe(string? value)
-    {
-        if (string.IsNullOrEmpty(value)) return string.Empty;
-
-        var sb = new StringBuilder(value.Length);
-        foreach (var ch in value)
-        {
-            if (!char.IsControl(ch)) sb.Append(ch);
-        }
-
-        return sb.Length <= 64 ? sb.ToString() : sb.ToString(0, 64);
-    }
-
-    private static string ToUserToken(string? userId)
-    {
-        if (string.IsNullOrWhiteSpace(userId)) return "anonymous";
-
-        var cleaned = LogSafe(userId);
-        var hash = SHA256.HashData(Encoding.UTF8.GetBytes(cleaned));
-        return Convert.ToHexString(hash)[..12];
     }
 }
