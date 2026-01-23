@@ -7,7 +7,7 @@ using StudyBuddy.Web.Services.LearningGoalConfig;
 using System.Linq;
 using Microsoft.AspNetCore.Antiforgery;
 
-var builder = WebApplication.CreateBuilder(args);
+var builder = WebApplication.CreateBuilder(args); 
 
 // ========== DATABASE ==========
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
